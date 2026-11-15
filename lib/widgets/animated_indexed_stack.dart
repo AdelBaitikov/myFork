@@ -1,4 +1,4 @@
-import "package:material_ui/material_ui.dart";
+import "package:flutter/material.dart";
 
 /// An [IndexedStack] that animates between children and keeps each page's
 /// state alive (scroll position, text input, etc.), like Instagram's tabs.
