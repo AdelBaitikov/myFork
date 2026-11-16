@@ -1,4 +1,6 @@
 import 'package:android_dev/screens/content/post_widget.dart';
+import 'package:android_dev/screens/content/story_widget.dart';
+import 'package:android_dev/screens/home_screen/data/demo_stories.dart';
 import 'package:android_dev/screens/home_screen/state/feed_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,15 +14,35 @@ class HomeTab extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(title: const Text('Instagram')),
-      body: ListView.builder(
-        itemCount: posts.length,
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.all(4),
-          child: PostWidget(
-            post: posts[index],
-            onLike: () => ref.read(feedControllerProvider.notifier).toggleLike(posts[index].id),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 104,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              itemCount: demoStories.length,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: StoryWidget(story: demoStories[index]),
+              ),
+            ),
           ),
-        ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.all(4),
+                child: PostWidget(
+                  post: posts[index],
+                  onLike: () => ref
+                      .read(feedControllerProvider.notifier)
+                      .toggleLike(posts[index].id),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

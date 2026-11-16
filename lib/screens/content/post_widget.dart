@@ -1,5 +1,6 @@
 import 'package:android_dev/screens/home_screen/models/post_model.dart';
 import 'package:flutter/material.dart';
+import 'comment_widget.dart';
 
 class PostWidget extends StatelessWidget {
   final PostModel post;
@@ -7,12 +8,36 @@ class PostWidget extends StatelessWidget {
 
   const PostWidget({super.key, required this.post, required this.onLike});
 
-  void openBottomSheet(BuildContext context) {
+  void openComments(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (context) => const SizedBox(
-        height: 200,
-        child: Center(child: Text('Comments')),
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.6,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Комментарии',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              Expanded(
+                child: post.comments.isEmpty
+                    ? const Center(child: Text('Пока нет комментариев'))
+                    : ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        children: [
+                          for (final comment in post.comments)
+                            CommentWidget(comment: comment),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -28,13 +53,29 @@ class PostWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(post.authorName, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(post.authorAvatarUrl),
+              ),
+              title: Text(
+                post.authorName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              dense: true,
             ),
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(post.imageUrl, width: double.infinity, fit: BoxFit.cover),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Image.network(
+                  post.imageUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                    child: Icon(Icons.broken_image_outlined, size: 48),
+                  ),
+                ),
+              ),
             ),
             Row(children: [
               IconButton(
@@ -43,12 +84,24 @@ class PostWidget extends StatelessWidget {
                 onPressed: onLike,
               ),
               Text('${post.likeCount}'),
-              IconButton(icon: const Icon(Icons.comment), onPressed: () => openBottomSheet(context)),
+              IconButton(
+                icon: const Icon(Icons.comment),
+                onPressed: () => openComments(context),
+              ),
+              Text('${post.commentCount}'),
               IconButton(icon: const Icon(Icons.share), onPressed: () {}),
               const Spacer(),
               IconButton(icon: const Icon(Icons.bookmark_border), onPressed: () {}),
             ]),
-            Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text(post.description)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(post.description),
+            ),
+            if (post.comments.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: CommentWidget(comment: post.comments.first),
+              ),
           ],
         ),
       );
